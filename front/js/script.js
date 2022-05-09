@@ -1,13 +1,13 @@
 fetch("http://localhost:3000/api/products")
 	.then((response) => response.json())
 	.then((data) => {
-		insertProducts(data)
+		insertData(data)
 	})
 
 // DOM
 const items = document.getElementById("items")
 
-function insertProducts(array) {
+function insertData(array) {
 	array.forEach((product) => {
 		console.log(product.name);
 		items.innerHTML += `

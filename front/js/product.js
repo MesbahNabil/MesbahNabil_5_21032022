@@ -43,15 +43,44 @@ function insertProducts(data) {
 const carts = document.getElementById("addToCart")
 // console.log(carts)
 
+const arrayCartData = []
+
 carts.addEventListener("click", function (event) {
-	// console.log("clicked")
-	// console.log(itemQuantity.value)
-	// console.log(itemColors.value)
-	// console.log(localStorage)
-	localStorage.setItem("cartQuantity", itemQuantity.value)
-	localStorage.setItem("cartColor", itemColors.value)
+	// Si selectedItem est en dehors cela prends la valeur par default
+	const selectedItem = {
+		id: urlId,
+		name: itemName.innerHTML,
+		color: itemColors.value,
+		qtty: parseInt(itemQuantity.value),
+	}
+
+	if (selectedItem.color == "colorsList" || selectedItem.qtty == "0") {
+		return null
+	}
+
+	// Si le panier est dans le local storage
+	if (!localStorage.getItem("cart")) {
+		localStorage.setItem("cart", "[]")
+	}
+
+	console.log("Le localstorage n'est pas vide.")
+	const cart = JSON.parse(localStorage.getItem("cart"))
+
+	const filteredResults = cart.find(function (cart) {
+		// si le nom et la couleur correspondent à un objet dans cart avec filter
+		return cart.color == selectedItem.color && cart.name == selectedItem.name
+	})
+
+	console.log(filteredResults)
+
+	if (filteredResults) {
+		// le produit existe déjà
+		filteredResults.qtty += selectedItem.qtty
+	} else {
+		// Créer l'item dans le panier
+
+		cart.push(selectedItem)
+	}
+
+	localStorage.setItem("cart", JSON.stringify(cart))
 })
-	
-
-
-	
