@@ -1,6 +1,5 @@
 // Dataset
 let productData = []
-// pas de const cart ? Modification du cart donc création d'erreur?
 
 function insertCart(products) {
 	let cart = JSON.parse(localStorage.getItem("cart"))
@@ -114,44 +113,140 @@ function quantityListener() {
 			let color = article.getAttribute("data-color")
 			let cart = JSON.parse(localStorage.getItem("cart"))
 			let itemFound = cart.find(function (item) {
-				console.log(item.qtty)
+				// console.log(item.qtty)
 				return productId === item.id && color === item.color
 			})
 			itemFound.qtty = inputChanged.value
+
 			localStorage.setItem("cart", JSON.stringify(cart))
-
-
 
 			calculTotalPanier(productData)
 		})
 	}
 }
 
-// changeQuantity(productData)
-// function changeQuantity(products) {
-// 	let cart = JSON.parse(localStorage.getItem("cart"))
+// Validations et Regular Expressions (RegEx)
+function ValidateFirstName() {
+	const firstName = document.getElementById("firstName").value
+	if (firstName.length < 2) {
+		const errorMsg = document.getElementById("firstNameErrorMsg")
+		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
+		console.log(errorMsg)
 
-// 	cart = cart.map(function (cartLine) {
-// 		let product = products.find(function (p) {
-// 			return p._id == cartLine.id
-// 		})
-// 		// cartLine.qtty = product.qtty
-// 		return cartLine
-// 	})
+		return false
+	}
+	return true
+}
+// console.log("teste first name ", ValidateFirstName())
 
-// 	console.log(cart)
-// 	cartItem = document.getElementById("cart__items")
-// 	cart.forEach((item) => {
-// 		// cartItem.innerHTML += `<input id="inputquantity" type="number" class="itemQuantity" name="itemQuantity" min=${0} max=${100} value=${
-// 		// 	item.qtty
-// 		// }>
-// 		// </div>`
-// 		let quantity = item.qtty
-// 		console.log(quantity)
-// 		quantity.deleteListener("change", quantitychanged)
-// 	})
+function ValidateLastName() {
+	const lastName = document.getElementById("lastName").value
+	if (lastName.length < 2) {
+		return false
+	}
 
-// }
+	return true
+}
+function ValidateAddress(address) {
+	const lastName = document.getElementById("lastName").value
+	const addressFormat = /^[a-zA-Z0-9\s,.'-]{3,}$/
+	if (lastName.match(addressFormat)) {
+		return true
+	}
+
+	return false
+}
+
+function ValidateCity() {
+	const city = document.getElementById("city").value
+	if (lastName.length < 2) {
+		return false
+	}
+
+	return true
+}
+
+function ValidateEmail(email) {
+	const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(String(email).toLowerCase())
+	if (email.match(emailFormat)) {
+		return true
+	}
+
+	return false
+}
+
+// creation d'un objet du nouvel utilisateur
+
+const form = document.getElementById("userForm")
+// console.log(form)
+const contact = {
+	firstName: document.getElementById("firstName").value,
+	lastName: document.getElementById("lastName").value,
+	adress: document.getElementById("address").value,
+	city: document.getElementById("city").value,
+	email: document.getElementById("email").value,
+	order: document.getElementById("order"),
+}
+// console.log(contact)
+
+// Dans product.js
+// Expects request to contain:
+//  * contact: {
+//  *   firstName: string,
+//  *   lastName: string,
+//  *   address: string,
+//  *   city: string,
+//  *   email: string
+//  * }
+//  * products: [string] <-- array of product _id
+
+function makeRequestBody() {
+	const body = {
+		contact: {
+			firstName: document.getElementById("firstName").value,
+			lastName: document.getElementById("lastName").value,
+			address: document.getElementById("address").value,
+			city: document.getElementById("city").value,
+			email: document.getElementById("email").value,
+		},
+
+		products: JSON.parse(localStorage.getItem("cart")).map((item) => item.id),
+	}
+	// if (!localStorage.getItem("cart")) {
+	// 	localStorage.setItem("cart", "[]")
+	// }
+	return body
+}
+
+form.addEventListener("submit", function (e) {
+	e.preventDefault()
+	// console.log(ValidateFirstName)&& !ValidateLastName() && ValidateAddress() && !ValidateCity() && ValidateEmail()
+	if (!ValidateFirstName()) {
+		alert("Please enter")
+		console.log("nop")
+		return
+	} else if (ValidateFirstName()) {
+		console.log("Test", makeRequestBody())
+
+		fetch("http://localhost:3000/api/products/order", {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(makeRequestBody()),
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				console.log(data)
+				localStorage.clear()
+				localStorage.setItem("orderID", data.orderId)
+
+				document.location.href = "confirmation.html"
+			})
+			.catch((error) => console.log(error))
+	}
+})
 
 fetch("http://localhost:3000/api/products")
 	.then((response) => response.json())
@@ -163,3 +258,5 @@ fetch("http://localhost:3000/api/products")
 
 		calculTotalPanier(productData)
 	})
+
+// régler le panier vide error msg et la validation / ensuite / numID sur confirmation
