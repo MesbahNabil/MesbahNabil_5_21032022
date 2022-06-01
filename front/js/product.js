@@ -54,7 +54,7 @@ carts.addEventListener("click", function (event) {
 		qtty: parseInt(itemQuantity.value),
 	}
 
-	if (selectedItem.color == "colorsList" || selectedItem.qtty == "0") {
+	if (selectedItem.color == "colorsList" || selectedItem.qtty <= 0) {
 		return null
 	}
 

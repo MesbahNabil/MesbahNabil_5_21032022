@@ -2,8 +2,11 @@
 let productData = []
 
 function insertCart(products) {
-	let cart = JSON.parse(localStorage.getItem("cart"))
 	cartItem = document.getElementById("cart__items")
+	if (!localStorage.getItem("cart")) {
+		localStorage.setItem("cart", "[]")
+	}
+	let cart = JSON.parse(localStorage.getItem("cart"))
 
 	cart = cart.map(function (cartLine) {
 		let product = products.find(function (p) {
@@ -14,8 +17,6 @@ function insertCart(products) {
 		cartLine.altTxt = product.altTxt
 		cartLine.imageUrl = product.imageUrl
 		return cartLine
-
-		console.log(cartLine)
 	})
 
 	cart.forEach((item) => {
@@ -116,7 +117,10 @@ function quantityListener() {
 				// console.log(item.qtty)
 				return productId === item.id && color === item.color
 			})
-			itemFound.qtty = inputChanged.value
+			if (parseInt(inputChanged.value) <= 0) {
+				return
+			}
+			itemFound.qtty = parseInt(inputChanged.value)
 
 			localStorage.setItem("cart", JSON.stringify(cart))
 
@@ -126,12 +130,12 @@ function quantityListener() {
 }
 
 // Validations et Regular Expressions (RegEx)
+// suppression de required dans le html
 function ValidateFirstName() {
 	const firstName = document.getElementById("firstName").value
 	if (firstName.length < 2) {
 		const errorMsg = document.getElementById("firstNameErrorMsg")
 		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
-		console.log(errorMsg)
 
 		return false
 	}
@@ -142,24 +146,33 @@ function ValidateFirstName() {
 function ValidateLastName() {
 	const lastName = document.getElementById("lastName").value
 	if (lastName.length < 2) {
+		const errorMsg = document.getElementById("lastNameErrorMsg")
+		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
+
 		return false
 	}
 
 	return true
 }
 function ValidateAddress(address) {
-	const lastName = document.getElementById("lastName").value
-	const addressFormat = /^[a-zA-Z0-9\s,.'-]{3,}$/
-	if (lastName.match(addressFormat)) {
-		return true
+	const addressForm = document.getElementById("address").value
+	// const addressFormat = /^[a-zA-Z0-9\s,.'-]{3,}$/
+	// if (addressForm.match(addressFormat)) {
+	// 	return true
+	// }
+	if (addressForm.length < 2) {
+		const errorMsg = document.getElementById("addressErrorMsg")
+		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
+		return false
 	}
-
-	return false
+	return true
 }
 
 function ValidateCity() {
 	const city = document.getElementById("city").value
-	if (lastName.length < 2) {
+	if (city.length < 2) {
+		const errorMsg = document.getElementById("cityErrorMsg")
+		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
 		return false
 	}
 
@@ -167,12 +180,17 @@ function ValidateCity() {
 }
 
 function ValidateEmail(email) {
-	const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(String(email).toLowerCase())
+	email = document.getElementById("email").value
+
+	const emailFormat = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 	if (email.match(emailFormat)) {
 		return true
+	} else {
+		const errorMsg = document.getElementById("emailErrorMsg")
+		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
+		console.log("wrong email")
+		return false
 	}
-
-	return false
 }
 
 // creation d'un objet du nouvel utilisateur
@@ -212,22 +230,14 @@ function makeRequestBody() {
 
 		products: JSON.parse(localStorage.getItem("cart")).map((item) => item.id),
 	}
-	// if (!localStorage.getItem("cart")) {
-	// 	localStorage.setItem("cart", "[]")
-	// }
+
 	return body
 }
 
 form.addEventListener("submit", function (e) {
 	e.preventDefault()
-	// console.log(ValidateFirstName)&& !ValidateLastName() && ValidateAddress() && !ValidateCity() && ValidateEmail()
-	if (!ValidateFirstName()) {
-		alert("Please enter")
-		console.log("nop")
-		return
-	} else if (ValidateFirstName()) {
-		console.log("Test", makeRequestBody())
-
+	let cart = JSON.parse(localStorage.getItem("cart"))
+	if (ValidateFirstName() && ValidateLastName() && ValidateAddress() && ValidateCity() && ValidateEmail() && cart.length > 0) {
 		fetch("http://localhost:3000/api/products/order", {
 			method: "POST",
 			headers: {
@@ -240,11 +250,12 @@ form.addEventListener("submit", function (e) {
 			.then((data) => {
 				console.log(data)
 				localStorage.clear()
-				localStorage.setItem("orderID", data.orderId)
 
-				document.location.href = "confirmation.html"
+				document.location.href = "confirmation.html?id=" + data.orderId
 			})
 			.catch((error) => console.log(error))
+	} else {
+		console.log("erreur")
 	}
 })
 
@@ -258,5 +269,3 @@ fetch("http://localhost:3000/api/products")
 
 		calculTotalPanier(productData)
 	})
-
-// régler le panier vide error msg et la validation / ensuite / numID sur confirmation
