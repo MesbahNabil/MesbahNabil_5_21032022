@@ -131,72 +131,89 @@ function quantityListener() {
 
 // Validations et Regular Expressions (RegEx)
 // suppression de required dans le html
-function ValidateFirstName() {
+function validateFirstName() {
 	const firstName = document.getElementById("firstName").value
+	const errorMsg = document.getElementById("firstNameErrorMsg")
 	if (firstName.length < 2) {
-		const errorMsg = document.getElementById("firstNameErrorMsg")
 		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
-
+		// console.log("bad firstname")
 		return false
+	} else {
+		errorMsg.innerHTML = ``
+		// console.log("Good Fristname")
+		return true
 	}
-	return true
 }
-// console.log("teste first name ", ValidateFirstName())
 
-function ValidateLastName() {
+function validateLastName() {
 	const lastName = document.getElementById("lastName").value
+	const errorMsg = document.getElementById("lastNameErrorMsg")
 	if (lastName.length < 2) {
-		const errorMsg = document.getElementById("lastNameErrorMsg")
 		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
-
+		// console.log("bad ln")
 		return false
+	} else {
+		errorMsg.innerHTML = ``
+		// console.log("good LN")
+		return true
 	}
-
-	return true
 }
-function ValidateAddress(address) {
+function validateAddress() {
 	const addressForm = document.getElementById("address").value
-	// const addressFormat = /^[a-zA-Z0-9\s,.'-]{3,}$/
-	// if (addressForm.match(addressFormat)) {
-	// 	return true
-	// }
-	if (addressForm.length < 2) {
-		const errorMsg = document.getElementById("addressErrorMsg")
+	const errorMsg = document.getElementById("addressErrorMsg")
+	const addressFormat = /^[a-zA-Z0-9\s,.'-]{3,}$/
+
+	if (addressForm.match(addressFormat)) {
+		errorMsg.innerHTML = ``
+		// console.log("good ad")
+		return true
+	} else {
 		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
+		// console.log("bad a")
 		return false
 	}
-	return true
 }
 
-function ValidateCity() {
+function validateCity() {
 	const city = document.getElementById("city").value
+	const errorMsg = document.getElementById("cityErrorMsg")
 	if (city.length < 2) {
-		const errorMsg = document.getElementById("cityErrorMsg")
 		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
+		// console.log("bad c")
 		return false
+	} else {
+		errorMsg.innerHTML = ``
+		// console.log("good c")
+		return true
 	}
-
-	return true
 }
 
-function ValidateEmail(email) {
-	email = document.getElementById("email").value
+function validateEmail() {
+	const email = document.getElementById("email").value
+	const errorMsg = document.getElementById("emailErrorMsg")
 
 	const emailFormat = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 	if (email.match(emailFormat)) {
+		errorMsg.innerHTML = ``
+		// console.log("good email")
 		return true
 	} else {
-		const errorMsg = document.getElementById("emailErrorMsg")
 		errorMsg.innerHTML = `Veuillez renseigner ce champ.`
-		console.log("wrong email")
+		// console.log("wrong email")
 		return false
 	}
 }
+function validateForm() {
+	validateFirstName(), validateLastName(), validateAddress(), validateCity(), validateEmail()
+	if (validateFirstName() && validateLastName() && validateAddress() && validateCity() && validateEmail()) {
+		return true
+	}
+}
+// console.log(validateForm())
 
 // creation d'un objet du nouvel utilisateur
 
 const form = document.getElementById("userForm")
-// console.log(form)
 const contact = {
 	firstName: document.getElementById("firstName").value,
 	lastName: document.getElementById("lastName").value,
@@ -205,7 +222,6 @@ const contact = {
 	email: document.getElementById("email").value,
 	order: document.getElementById("order"),
 }
-// console.log(contact)
 
 // Dans product.js
 // Expects request to contain:
@@ -236,26 +252,31 @@ function makeRequestBody() {
 
 form.addEventListener("submit", function (e) {
 	e.preventDefault()
-	let cart = JSON.parse(localStorage.getItem("cart"))
-	if (ValidateFirstName() && ValidateLastName() && ValidateAddress() && ValidateCity() && ValidateEmail() && cart.length > 0) {
-		fetch("http://localhost:3000/api/products/order", {
-			method: "POST",
-			headers: {
-				Accept: "application/json",
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(makeRequestBody()),
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				console.log(data)
-				localStorage.clear()
+	const cart = JSON.parse(localStorage.getItem("cart"))
 
-				document.location.href = "confirmation.html?id=" + data.orderId
+	// Si le panier est vide
+	if (cart.length != 0) {
+		// Si le formulaire est valide
+		if (validateForm()) {
+			fetch("http://localhost:3000/api/products/order", {
+				method: "POST",
+				headers: {
+					Accept: "application/json",
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(makeRequestBody()),
 			})
-			.catch((error) => console.log(error))
+				.then((res) => res.json())
+				.then((data) => {
+					console.log(data)
+					localStorage.clear()
+
+					document.location.href = "confirmation.html?id=" + data.orderId
+				})
+				.catch((error) => console.log(error))
+		}
 	} else {
-		console.log("erreur")
+		alert("Le panier est vide.")
 	}
 })
 
