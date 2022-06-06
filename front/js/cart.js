@@ -58,16 +58,17 @@ function deleteListener() {
 
 			article.remove()
 			const productId = article.getAttribute("data-id")
-			console.log(productId)
+			// console.log(productId)
 			const color = article.getAttribute("data-color")
-			console.log(color)
+			// console.log(color)
 			let cart = JSON.parse(localStorage.getItem("cart"))
-			console.log(cart)
+			// console.log(cart)
 
 			const newCart = cart.filter(function (item) {
 				return !(productId === item.id && color === item.color)
+				//return productId !== item.id || color !== item.color
 			})
-			console.log(newCart)
+			// console.log(newCart)
 			localStorage.setItem("cart", JSON.stringify(newCart))
 
 			calculTotalPanier(productData)
@@ -106,11 +107,11 @@ function quantityListener() {
 
 		input.addEventListener("change", function (event) {
 			const inputChanged = event.target
-			console.log(inputChanged)
+			// console.log(inputChanged)
 
 			let article = inputChanged.closest("article")
 			let productId = article.getAttribute("data-id")
-			console.log(productId)
+			// console.log(productId)
 			let color = article.getAttribute("data-color")
 			let cart = JSON.parse(localStorage.getItem("cart"))
 			let itemFound = cart.find(function (item) {
@@ -161,8 +162,7 @@ function validateLastName() {
 function validateAddress() {
 	const addressForm = document.getElementById("address").value
 	const errorMsg = document.getElementById("addressErrorMsg")
-	const addressFormat = /^[a-zA-Z0-9\s,.'-]{3,}$/
-
+	const addressFormat = /^[a-zA-Z0-9éèàç\s,.'-]{3,}$/
 	if (addressForm.match(addressFormat)) {
 		errorMsg.innerHTML = ``
 		// console.log("good ad")
@@ -211,17 +211,9 @@ function validateForm() {
 }
 // console.log(validateForm())
 
+//
+//
 // creation d'un objet du nouvel utilisateur
-
-const form = document.getElementById("userForm")
-const contact = {
-	firstName: document.getElementById("firstName").value,
-	lastName: document.getElementById("lastName").value,
-	adress: document.getElementById("address").value,
-	city: document.getElementById("city").value,
-	email: document.getElementById("email").value,
-	order: document.getElementById("order"),
-}
 
 // Dans product.js
 // Expects request to contain:
@@ -247,16 +239,22 @@ function makeRequestBody() {
 		products: JSON.parse(localStorage.getItem("cart")).map((item) => item.id),
 	}
 
+	//   JSON.parse(localStorage.getItem("cart")).map(function (item) {
+	//   	return item.id;
+	//   });
+
 	return body
 }
+
+const form = document.getElementById("userForm")
 
 form.addEventListener("submit", function (e) {
 	e.preventDefault()
 	const cart = JSON.parse(localStorage.getItem("cart"))
 
-	// Si le panier est vide
+	// Si le panier n'est pas vide
 	if (cart.length != 0) {
-		// Si le formulaire est valide
+		// Si le formulaire est valide alors
 		if (validateForm()) {
 			fetch("http://localhost:3000/api/products/order", {
 				method: "POST",

@@ -46,7 +46,6 @@ const carts = document.getElementById("addToCart")
 const arrayCartData = []
 
 carts.addEventListener("click", function (event) {
-	// Si selectedItem est en dehors cela prends la valeur par default
 	const selectedItem = {
 		id: urlId,
 		name: itemName.innerHTML,
@@ -54,16 +53,17 @@ carts.addEventListener("click", function (event) {
 		qtty: parseInt(itemQuantity.value),
 	}
 
+	// S'il n'y a pas de couleur ou de quantié
 	if (selectedItem.color == "colorsList" || selectedItem.qtty <= 0) {
 		return null
 	}
 
-	// Si le panier est dans le local storage
+	// Si le panier n'existe pas alors crée un panier
 	if (!localStorage.getItem("cart")) {
 		localStorage.setItem("cart", "[]")
 	}
 
-	console.log("Le localstorage n'est pas vide.")
+	// console.log("Le localstorage n'est pas vide.")
 	const cart = JSON.parse(localStorage.getItem("cart"))
 
 	const filteredResults = cart.find(function (cart) {
@@ -71,13 +71,11 @@ carts.addEventListener("click", function (event) {
 		return cart.color == selectedItem.color && cart.name == selectedItem.name
 	})
 
-	console.log(filteredResults)
-
 	if (filteredResults) {
 		// le produit existe déjà
 		filteredResults.qtty += selectedItem.qtty
 	} else {
-		// Créer l'item dans le panier
+		// Sinon Créer l'item dans le panier
 
 		cart.push(selectedItem)
 	}

@@ -9,7 +9,7 @@ const items = document.getElementById("items")
 
 function insertData(array) {
 	array.forEach((product) => {
-		console.log(product.name);
+		// console.log(product.name);
 		items.innerHTML += `
 	<a href="./product.html?id=${product._id}">
 		<article>
